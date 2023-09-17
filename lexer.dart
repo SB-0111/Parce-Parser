@@ -15,7 +15,7 @@ class Lexer {
 
     if (_match(RegExp(r'^=$'))) {
       if (_peekCharacter() == '=') {
-        final token = _makeTwoCharacterToken(TokenType.EQ);
+        final token = _makeTwoCharacterToken(TokenType.EQ as String);
         return token;
       } else {
         final token = Token(TokenType.ASSIGN, _character);
@@ -76,7 +76,7 @@ class Lexer {
       return token;
     } else if (_match(RegExp(r'^!$'))) {
       if (_peekCharacter() == '=') {
-        final token = _makeTwoCharacterToken(TokenType.NOT_EQ);
+        final token = _makeTwoCharacterToken(TokenType.NOT_EQ as String);
         return token;
       } else {
         final token = Token(TokenType.NEGATION, _character);
@@ -85,11 +85,11 @@ class Lexer {
       }
     } else if (_isLetter(_character)) {
       final literal = _readIdentifier();
-      final tokenType = _lookupTokenType(literal);
-      return Token(tokenType, literal);
+      final tokenType = lookupTokenType(literal);
+      return Token(tokenType as TokenType, literal);
     } else if (_isNumber(_character)) {
       final literal = _readNumber();
-      return Token(TokenType.INT, literal);
+      return Token(TokenType.INTEGER, literal);
     } else {
       final token = Token(TokenType.ILLEGAL, _character);
       _readCharacter();
@@ -109,7 +109,7 @@ class Lexer {
     final prefix = _character;
     _readCharacter();
     final suffix = _character;
-    final token = Token(tokenType, '$prefix$suffix');
+    final token = Token(tokenType as TokenType, '$prefix$suffix');
     _readCharacter();
     return token;
   }
@@ -163,19 +163,5 @@ class Lexer {
 
   bool _match(RegExp pattern) {
     return pattern.firstMatch(_character) != null;
-  }
-
-  String _lookupTokenType(String literal) {
-    final keywords = {
-      'falso': TokenType.FALSE,
-      'procedimiento': TokenType.FUNCTION,
-      'regresa': TokenType.RETURN,
-      'si': TokenType.IF,
-      'si_no': TokenType.ELSE,
-      'variable': TokenType.LET,
-      'verdadero': TokenType.TRUE,
-    };
-
-    return keywords[literal] ?? TokenType.IDENTIFIER;
   }
 }

@@ -1,26 +1,29 @@
 import 'dart:io';
 import 'lexer.dart';
-import 'tokens.dart';
+import 'parser.dart';
+import 'evaluator.dart';
 
 void startRepl() {
   while (true) {
-    stdout.write("Enter a command: ");
     stdout.write('>> ');
-    final source = stdin.readLineSync();
+    final source = stdin.readLineSync().toString();
+    // var source = 'hola';
+    // var source = '1 + 2';
 
     if (source == 'salir()') {
-      print("Nos Fui");
+      print("Nos Fuimos");
       break;
     }
-
-    final lexer = Lexer(source!);
-    Token token;
-
-    do {
-      token = lexer.nextToken();
-      if (token.type != TokenType.EOF) {
-        print("Token: ${token.type}, Literal: ${token.literal}");
-      }
-    } while (token.type != TokenType.EOF);
+    final Lexer lexer = Lexer(source);
+    final parser = Parser(lexer);
+    final program = parser.parseProgram();
+    final evaluated = evaluate(program);
+    if (evaluated.runtimeType.toString() != "Null") {
+      print(evaluated!.inspect());
+    }
   }
+}
+
+void main(List<String> args) {
+  startRepl();
 }
