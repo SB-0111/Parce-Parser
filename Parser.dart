@@ -187,7 +187,6 @@ class Parser {
     final expression = _parseExpression(Precedence.LOWEST);
 
     if (expression == null) {
-      // Handle the case where expression is null (an error or unexpected input).
       _errors.add('Failed to parse expression statement.');
       return null;
     }
@@ -308,8 +307,7 @@ class Parser {
 
     final right = _parseExpression(precedence);
     if (right == null) {
-      // Handle the case where parsing the right expression fails.
-      return infix; // Or return null or handle the error appropriately.
+      return infix;
     }
 
     infix.right = right;
