@@ -57,8 +57,8 @@ class Identifier extends Expression {
 }
 
 class LetStatement extends Statement {
-  late final Identifier? name;
-  late final Expression? value;
+  late Identifier? name;
+  late Expression? value;
 
   LetStatement(Token token, {this.name, this.value}) : super(token);
 

@@ -99,13 +99,13 @@ Object? evaluate(ast.ASTNode node, [Enviroment? env]) {
   } else if (node is ast.Boolean) {
     return _toBooleanObject(node.value as bool);
   } else if (node is ast.Prefix) {
-    final right = evaluate(node.right as ast.ASTNode);
+    final right = evaluate(node.right as ast.ASTNode, env);
     if (right != null) {
       return _evaluatePrefixExpression(node.operator, right);
     }
   } else if (node is ast.Infix) {
-    final left = evaluate(node.left);
-    final right = evaluate(node.right as ast.ASTNode);
+    final left = evaluate(node.left, env);
+    final right = evaluate(node.right as ast.ASTNode, env);
     if (left != null && right != null) {
       return _evaluateInfixExpression(node.operator, left, right);
     }
@@ -114,14 +114,14 @@ Object? evaluate(ast.ASTNode node, [Enviroment? env]) {
   } else if (node is ast.If) {
     return _evaluateIfExpression(node, env);
   } else if (node is ast.ReturnStatement) {
-    final returnValues = evaluate(node.returnValue as ast.ASTNode);
+    final returnValues = evaluate(node.returnValue as ast.ASTNode, env);
     if (returnValues != null) {
       return Return(returnValues);
     } else {
       throw Exception('Return value cannot be null');
     }
   } else if (node is ast.LetStatement) {
-    final value = evaluate(node.value!);
+    final value = evaluate(node.value!, env);
     if (value != null) {
       env!.set(node.name!.value, value);
     }
@@ -133,17 +133,17 @@ Object? evaluate(ast.ASTNode node, [Enviroment? env]) {
 }
 
 Object _evaluate_identifier(ast.Identifier node, [Enviroment? env]) {
-  final value = env!.get(node.value);
+  final value = env?.get(node.value);
   if (value != null) {
     return value;
   }
-  return NULL;
+  throw Exception('Variable ${node.value} not found in the environment');
 }
 
 Object? _evaluateStatements(List<ast.Statement> statements, [Enviroment? env]) {
   Object? result = NULL;
   for (final statement in statements) {
-    result = evaluate(statement);
+    result = evaluate(statement, env);
   }
   return result;
 }
@@ -165,7 +165,7 @@ Object? _evaluateIfExpression(ast.If ifExpression, [Enviroment? env]) {
 Object? _evaluate_program(ast.Program program, [Enviroment? env]) {
   Object? result;
   for (final statement in program.statements) {
-    result = evaluate(statement);
+    result = evaluate(statement, env);
 
     if (result != null && result.type() == ObjectType.RETURN) {
       return (result as Return).value;

@@ -21,6 +21,7 @@ void startRepl() {
     final program = parser.parseProgram();
     Enviroment env = Enviroment();
     final evaluated = evaluate(program, env);
+    // print(env.store);
     if (evaluated.runtimeType.toString() != "Null") {
       print(evaluated!.inspect());
     }
