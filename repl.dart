@@ -2,6 +2,7 @@ import 'dart:io';
 import 'lexer.dart';
 import 'parser.dart';
 import 'evaluator.dart';
+import 'objects.dart';
 
 void startRepl() {
   while (true) {
@@ -18,7 +19,8 @@ void startRepl() {
     final Lexer lexer = Lexer(source);
     final parser = Parser(lexer);
     final program = parser.parseProgram();
-    final evaluated = evaluate(program);
+    Enviroment env = Enviroment();
+    final evaluated = evaluate(program, env);
     if (evaluated.runtimeType.toString() != "Null") {
       print(evaluated!.inspect());
     }

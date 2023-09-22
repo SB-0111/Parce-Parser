@@ -87,12 +87,12 @@ Object _evaluateInfixExpression(String operator, Object left, Object right) {
   }
 }
 
-Object? evaluate(ast.ASTNode node) {
+Object? evaluate(ast.ASTNode node, [Enviroment? env]) {
   if (node is ast.Program) {
-    return _evaluateStatements(node.statements);
+    return _evaluate_program(node, env);
   } else if (node is ast.ExpressionStatement) {
     if (node.expression != null) {
-      return evaluate(node.expression!);
+      return evaluate(node.expression!, env);
     }
   } else if (node is ast.Integer) {
     return Integer(node.value as int);
@@ -110,15 +110,37 @@ Object? evaluate(ast.ASTNode node) {
       return _evaluateInfixExpression(node.operator, left, right);
     }
   } else if (node is ast.Block) {
-    return _evaluateStatements(node.statements);
+    return _evaluate_block_statement(node, env);
   } else if (node is ast.If) {
-    return _evaluateIfExpression(node);
+    return _evaluateIfExpression(node, env);
+  } else if (node is ast.ReturnStatement) {
+    final returnValues = evaluate(node.returnValue as ast.ASTNode);
+    if (returnValues != null) {
+      return Return(returnValues);
+    } else {
+      throw Exception('Return value cannot be null');
+    }
+  } else if (node is ast.LetStatement) {
+    final value = evaluate(node.value!);
+    if (value != null) {
+      env!.set(node.name!.value, value);
+    }
+  } else if (node is ast.Identifier) {
+    return _evaluate_identifier(node, env);
   }
 
   return NULL;
 }
 
-Object? _evaluateStatements(List<ast.Statement> statements) {
+Object _evaluate_identifier(ast.Identifier node, [Enviroment? env]) {
+  final value = env!.get(node.value);
+  if (value != null) {
+    return value;
+  }
+  return NULL;
+}
+
+Object? _evaluateStatements(List<ast.Statement> statements, [Enviroment? env]) {
   Object? result = NULL;
   for (final statement in statements) {
     result = evaluate(statement);
@@ -130,12 +152,36 @@ bool _isTruthy(Object obj) {
   return obj != NULL && obj != FALSE;
 }
 
-Object? _evaluateIfExpression(ast.If ifExpression) {
-  final condition = evaluate(ifExpression.condition as ast.ASTNode);
+Object? _evaluateIfExpression(ast.If ifExpression, [Enviroment? env]) {
+  final condition = evaluate(ifExpression.condition as ast.ASTNode, env);
   if (_isTruthy(condition!)) {
-    return _evaluateStatements(ifExpression.consequence!.statements);
+    return _evaluateStatements(ifExpression.consequence!.statements, env);
   } else if (ifExpression.alternative != null) {
-    return _evaluateStatements(ifExpression.alternative!.statements);
+    return _evaluateStatements(ifExpression.alternative!.statements, env);
   }
   return NULL;
+}
+
+Object? _evaluate_program(ast.Program program, [Enviroment? env]) {
+  Object? result;
+  for (final statement in program.statements) {
+    result = evaluate(statement);
+
+    if (result != null && result.type() == ObjectType.RETURN) {
+      return (result as Return).value;
+    }
+  }
+  return result;
+}
+
+Object? _evaluate_block_statement(ast.Block block, [Enviroment? env]) {
+  Object? result;
+  for (final statement in block.statements) {
+    result = evaluate(statement, env);
+
+    if (result != null && (result.type() == ObjectType.RETURN)) {
+      return result;
+    }
+  }
+  return result;
 }

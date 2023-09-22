@@ -359,16 +359,16 @@ class Parser {
   }
 
   ReturnStatement? _parseReturnStatement() {
-    final returnStatement = ReturnStatement(_currentToken!);
+    _advanceTokens(); // Advance to the next token
 
-    _advanceTokens();
-    returnStatement.returnValue = _parseExpression(Precedence.LOWEST);
+    // Parse the return value expression
+    final returnValue = _parseExpression(Precedence.LOWEST);
 
     if (_peekToken!.token_type == TokenType.SEMICOLON) {
-      _advanceTokens();
+      _advanceTokens(); // Advance past the semicolon
     }
 
-    return returnStatement;
+    return ReturnStatement(_currentToken!, returnValue: returnValue);
   }
 
   Statement? _parseStatement() {

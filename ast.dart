@@ -66,10 +66,20 @@ class LetStatement extends Statement {
   String toString() => '${tokenLiteral()} $name = $value;';
 }
 
+// class ReturnStatement extends Statement {
+//   late final Expression? returnValue;
+
+//   ReturnStatement(Token token, {this.returnValue}) : super(token);
+
+//   @override
+//   String toString() => '${tokenLiteral()} ${returnValue.toString()};';
+// }
 class ReturnStatement extends Statement {
   late final Expression? returnValue;
 
-  ReturnStatement(Token token, {this.returnValue}) : super(token);
+  ReturnStatement(Token token, {Expression? returnValue})
+      : returnValue = returnValue, // Initialize returnValue first
+        super(token); // Call super constructor last
 
   @override
   String toString() => '${tokenLiteral()} ${returnValue.toString()};';
