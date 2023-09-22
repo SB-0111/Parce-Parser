@@ -46,8 +46,8 @@ Object? _evaluateIntegerInfixExpression(
     return NULL;
   }
 
-  final leftInt = left as Integer;
-  final rightInt = right as Integer;
+  final leftInt = left;
+  final rightInt = right;
 
   switch (operator) {
     case "+":

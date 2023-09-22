@@ -15,7 +15,7 @@ class Lexer {
 
     if (_match(RegExp(r'^=$'))) {
       if (_peekCharacter() == '=') {
-        final token = _makeTwoCharacterToken(TokenType.EQ as String);
+        final token = _makeTwoCharacterToken(TokenType.EQ);
         return token;
       } else {
         final token = Token(TokenType.ASSIGN, _character);
@@ -67,16 +67,26 @@ class Lexer {
       _readCharacter();
       return token;
     } else if (_match(RegExp(r'^<$'))) {
-      final token = Token(TokenType.LT, _character);
-      _readCharacter();
-      return token;
+      if (_peekCharacter() == '=') {
+        final token = _makeTwoCharacterToken(TokenType.LTE);
+        return token;
+      } else {
+        final token = Token(TokenType.LT, _character);
+        _readCharacter();
+        return token;
+      }
     } else if (_match(RegExp(r'^>$'))) {
-      final token = Token(TokenType.GT, _character);
-      _readCharacter();
-      return token;
+      if (_peekCharacter() == '=') {
+        final token = _makeTwoCharacterToken(TokenType.GTE);
+        return token;
+      } else {
+        final token = Token(TokenType.GT, _character);
+        _readCharacter();
+        return token;
+      }
     } else if (_match(RegExp(r'^!$'))) {
       if (_peekCharacter() == '=') {
-        final token = _makeTwoCharacterToken(TokenType.NOT_EQ as String);
+        final token = _makeTwoCharacterToken(TokenType.DIF);
         return token;
       } else {
         final token = Token(TokenType.NEGATION, _character);
@@ -105,7 +115,7 @@ class Lexer {
     return RegExp(r'^\d$').hasMatch(character);
   }
 
-  Token _makeTwoCharacterToken(String tokenType) {
+  Token _makeTwoCharacterToken(TokenType tokenType) {
     final prefix = _character;
     _readCharacter();
     final suffix = _character;

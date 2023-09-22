@@ -15,6 +15,7 @@ enum Precedence {
   PRODUCT,
   PREFIX,
   CALL,
+  NEGATION,
 }
 
 final Map<TokenType, Precedence> PRECEDENCES = {
@@ -27,6 +28,9 @@ final Map<TokenType, Precedence> PRECEDENCES = {
   TokenType.DIVISION: Precedence.PRODUCT,
   TokenType.MULTIPLICATION: Precedence.PRODUCT,
   TokenType.LPAREN: Precedence.CALL,
+  TokenType.NEGATION: Precedence.NEGATION,
+  TokenType.LTE: Precedence.LESSGREATER,
+  TokenType.GTE: Precedence.LESSGREATER,
 };
 
 class Parser {
@@ -50,7 +54,6 @@ class Parser {
     final program = Program(statements: []);
 
     while (_currentToken!.token_type != TokenType.EOF) {
-      // print(_currentToken!.token_type);
       final statement = _parseStatement();
 
       if (statement != null) {
@@ -175,6 +178,16 @@ class Parser {
 
         _advanceTokens();
         leftExpression = infixParseFn(leftExpression!);
+
+        if (_currentToken!.token_type == TokenType.GTE) {
+          return _parseInfixExpression(_parseExpression(precedence)!);
+        } else if (_currentToken!.token_type == TokenType.LTE) {
+          return _parseInfixExpression(_parseExpression(precedence)!);
+        } else if (_currentToken!.token_type == TokenType.EQEQ) {
+          return _parseInfixExpression(_parseExpression(precedence)!);
+        } else if (_currentToken!.token_type == TokenType.NEQ) {
+          return _parseInfixExpression(_parseExpression(precedence)!);
+        }
       }
 
       return leftExpression;
@@ -209,8 +222,8 @@ class Parser {
     return expression;
   }
 
-  Functions? _parseFunction() {
-    late final Functions function = Functions(_currentToken!);
+  Funcion? _parseFunction() {
+    late final Funcion function = Funcion(_currentToken!);
 
     if (!_expectedToken(TokenType.LPAREN)) {
       return null;
@@ -266,37 +279,6 @@ class Parser {
     );
   }
 
-  If? _parseIf() {
-    final ifExpression = If(_currentToken!);
-
-    if (!_expectedToken(TokenType.LPAREN)) {
-      return null;
-    }
-
-    _advanceTokens();
-    ifExpression.condition = _parseExpression(Precedence.LOWEST);
-
-    if (!_expectedToken(TokenType.RPAREN)) {
-      return null;
-    }
-
-    if (!_expectedToken(TokenType.LBRACE)) {
-      return null;
-    }
-
-    ifExpression.consequence = _parseBlock();
-
-    if (_peekToken!.token_type == TokenType.ELSE) {
-      _advanceTokens();
-      if (!_expectedToken(TokenType.LBRACE)) {
-        return null;
-      }
-      ifExpression.alternative = _parseBlock();
-    }
-
-    return ifExpression;
-  }
-
   Infix _parseInfixExpression(Expression left) {
     assert(_currentToken != null);
     final infix = Infix(_currentToken!, left, _currentToken!.literal);
@@ -308,6 +290,17 @@ class Parser {
     final right = _parseExpression(precedence);
     if (right == null) {
       return infix;
+    }
+    if (_currentToken!.token_type == TokenType.GTE) {
+      return Infix(_currentToken!, left, _currentToken!.literal);
+    } else if (_currentToken!.token_type == TokenType.LTE) {
+      return Infix(_currentToken!, left, _currentToken!.literal);
+    } else if (_currentToken!.token_type == TokenType.EQEQ) {
+      return Infix(_currentToken!, left, _currentToken!.literal);
+    } else if (_currentToken!.token_type == TokenType.NEQ) {
+      return Infix(_currentToken!, left, _currentToken!.literal);
+    } else if (_currentToken!.token_type == TokenType.NEGATION) {
+      return Infix(_currentToken!, left, _currentToken!.literal);
     }
 
     infix.right = right;
@@ -360,7 +353,7 @@ class Parser {
     );
 
     _advanceTokens();
-    prefixExpression.right = _parseExpression(Precedence.PREFIX)!;
+    prefixExpression.right = _parseExpression(Precedence.PREFIX);
 
     return prefixExpression;
   }
@@ -403,10 +396,13 @@ class Parser {
       TokenType.DIVISION: (left) => _parseInfixExpression(left),
       TokenType.MULTIPLICATION: (left) => _parseInfixExpression(left),
       TokenType.EQ: (left) => _parseInfixExpression(left),
+      TokenType.NOT_EQ: (left) => _parseInfixExpression(left),
       TokenType.DIF: (left) => _parseInfixExpression(left),
       TokenType.LT: (left) => _parseInfixExpression(left),
       TokenType.GT: (left) => _parseInfixExpression(left),
       TokenType.LPAREN: (left) => _parseCall(left),
+      TokenType.LTE: (left) => _parseInfixExpression(left),
+      TokenType.GTE: (left) => _parseInfixExpression(left),
     };
   }
 
@@ -415,7 +411,6 @@ class Parser {
       TokenType.FALSE: () => _parseBoolean(),
       TokenType.FUNCTION: () => _parseFunction(),
       TokenType.IDENTIFIER: () => _parseIdentifier(),
-      TokenType.IF: () => _parseIf(),
       TokenType.INTEGER: () => _parseInt(),
       TokenType.LPAREN: () => _parseGroupedExpression(),
       TokenType.MINUS: () => _parsePrefixExpression(),

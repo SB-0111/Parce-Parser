@@ -15,19 +15,18 @@ class Statement extends ASTNode {
   }
 }
 
-class Expression extends ASTNode {
-  final Token token;
+abstract class Expression implements ASTNode {
+  Token token;
 
   Expression(this.token);
 
   @override
-  String tokenLiteral() {
-    return token.literal;
-  }
+  String tokenLiteral() => token.literal;
 }
 
 class Program extends ASTNode {
   late List<Statement> statements;
+
   Program({required this.statements});
 
   @override
@@ -35,30 +34,26 @@ class Program extends ASTNode {
     if (statements.isNotEmpty) {
       return statements[0].tokenLiteral();
     }
-
     return '';
   }
 
   @override
   String toString() {
-    final out = <String>[];
-    for (final statement in statements) {
+    List<String> out = [];
+    for (var statement in statements) {
       out.add(statement.toString());
     }
-
     return out.join('');
   }
 }
 
 class Identifier extends Expression {
-  final String value;
+  String value;
 
   Identifier(Token token, this.value) : super(token);
 
   @override
-  String toString() {
-    return value;
-  }
+  String toString() => value;
 }
 
 class LetStatement extends Statement {
@@ -68,9 +63,7 @@ class LetStatement extends Statement {
   LetStatement(Token token, {this.name, this.value}) : super(token);
 
   @override
-  String toString() {
-    return '${tokenLiteral()} ${name.toString()} = ${value.toString()};';
-  }
+  String toString() => '${tokenLiteral()} $name = $value;';
 }
 
 class ReturnStatement extends Statement {
@@ -79,9 +72,7 @@ class ReturnStatement extends Statement {
   ReturnStatement(Token token, {this.returnValue}) : super(token);
 
   @override
-  String toString() {
-    return '${tokenLiteral()} ${returnValue.toString()};';
-  }
+  String toString() => '${tokenLiteral()} ${returnValue.toString()};';
 }
 
 class ExpressionStatement extends Statement {
@@ -92,9 +83,7 @@ class ExpressionStatement extends Statement {
         super(token);
 
   @override
-  String toString() {
-    return expression.toString();
-  }
+  String toString() => expression.toString();
 }
 
 class Integer extends Expression {
@@ -103,22 +92,19 @@ class Integer extends Expression {
   Integer(Token? token, {int? value}) : super(token!) {
     this.value = value;
   }
+
   @override
-  String toString() {
-    return value.toString();
-  }
+  String toString() => value.toString();
 }
 
 class Prefix extends Expression {
   final String operator;
-  late final Expression? right;
+  Expression? right;
 
   Prefix(Token token, this.operator, {this.right}) : super(token);
 
   @override
-  String toString() {
-    return '($operator${right.toString()})';
-  }
+  String toString() => '($operator$right)';
 }
 
 class Infix extends Expression {
@@ -129,9 +115,7 @@ class Infix extends Expression {
   Infix(Token token, this.left, this.operator) : super(token);
 
   @override
-  String toString() {
-    return '(${left.toString()} $operator ${right.toString()})';
-  }
+  String toString() => '(${left.toString()} $operator ${right.toString()})';
 }
 
 class Boolean extends Expression {
@@ -140,13 +124,11 @@ class Boolean extends Expression {
   Boolean(Token token, bool bool, {this.value}) : super(token);
 
   @override
-  String toString() {
-    return tokenLiteral();
-  }
+  String toString() => tokenLiteral();
 }
 
 class Block extends Statement {
-  final List<Statement> statements;
+  List<Statement> statements;
 
   Block(Token token, this.statements) : super(token);
 
@@ -157,6 +139,19 @@ class Block extends Statement {
       out.add(statement.toString());
     }
     return out.join('');
+  }
+}
+
+class Funcion extends Expression {
+  late final List<Identifier> parameters;
+  late final Block? body;
+
+  Funcion(Token token, {this.parameters = const [], this.body}) : super(token);
+
+  @override
+  String toString() {
+    String paramList = parameters.map((param) => param.toString()).join(', ');
+    return '${tokenLiteral()}($paramList) ${body.toString()}';
   }
 }
 
@@ -178,32 +173,16 @@ class If extends Expression {
   }
 }
 
-class Functions extends Expression {
-  late final List<Identifier> parameters;
-  late final Block? body;
-
-  Functions(Token token, {this.parameters = const [], this.body})
-      : super(token);
-
-  @override
-  String toString() {
-    final paramList =
-        parameters.map((parameter) => parameter.toString()).join(', ');
-    return '${tokenLiteral()}($paramList) ${body.toString()}';
-  }
-}
-
 class Call extends Expression {
-  final Expression function;
-  late final List<Expression>? arguments;
+  Expression function;
+  List<Expression>? arguments;
 
   Call(Token token, this.function, {this.arguments}) : super(token);
 
   @override
   String toString() {
     assert(arguments != null);
-    final argList =
-        arguments!.map((argument) => argument.toString()).join(', ');
+    final argList = arguments!.map((arg) => arg.toString()).join(', ');
     return '${function.toString()}($argList)';
   }
 }

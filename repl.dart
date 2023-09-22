@@ -9,6 +9,7 @@ void startRepl() {
     final source = stdin.readLineSync().toString();
     // var source = 'hola';
     // var source = '1 + 2';
+    // var source = '6>=6';
 
     if (source == 'salir()') {
       print("Nos Fuimos");
