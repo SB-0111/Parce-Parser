@@ -83,13 +83,13 @@ class Return extends Object {
 
 //Esta clase es la que va a utilizar para guardar las variables
 class Enviroment {
-  Map<String, Object> store = {};
+  Map<String, dynamic> store = {};
 
-  Object? get(String name) {
+  dynamic get(String name) {
     return store[name];
   }
 
-  void set(String name, Object value) {
+  void set(String name, dynamic value) {
     store[name] = value;
   }
 

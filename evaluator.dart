@@ -122,6 +122,7 @@ Object? evaluate(ast.ASTNode node, [Enviroment? env]) {
     }
   } else if (node is ast.LetStatement) {
     final value = evaluate(node.value!, env);
+    final real = value;
     if (value != null) {
       env!.set(node.name!.value, value);
     }
@@ -138,6 +139,7 @@ Object _evaluate_identifier(ast.Identifier node, [Enviroment? env]) {
     return value;
   }
   throw Exception('Variable ${node.value} not found in the environment');
+  // return NULL;
 }
 
 Object? _evaluateStatements(List<ast.Statement> statements, [Enviroment? env]) {
