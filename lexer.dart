@@ -100,6 +100,10 @@ class Lexer {
     } else if (_isNumber(_character)) {
       final literal = _readNumber();
       return Token(TokenType.INTEGER, literal);
+    } else if (_match(RegExp(r'^"'))) {
+      final literal = _read_string();
+      _readCharacter();
+      return Token(TokenType.STRING, literal);
     } else {
       final token = Token(TokenType.ILLEGAL, _character);
       _readCharacter();
@@ -173,5 +177,13 @@ class Lexer {
 
   bool _match(RegExp pattern) {
     return pattern.firstMatch(_character) != null;
+  }
+
+  String _read_string() {
+    final initialPosition = _position + 1;
+    while (_character != '"') {
+      _readCharacter();
+    }
+    return _source.substring(initialPosition, _position);
   }
 }

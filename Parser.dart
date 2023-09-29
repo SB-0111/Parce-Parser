@@ -416,6 +416,11 @@ class Parser {
       TokenType.MINUS: () => _parsePrefixExpression(),
       TokenType.NEGATION: () => _parsePrefixExpression(),
       TokenType.TRUE: () => _parseBoolean(),
+      TokenType.STRING: () => _parseString(),
     };
+  }
+
+  Expression _parseString() {
+    return StringLiteral(_currentToken!, value: _currentToken!.literal);
   }
 }

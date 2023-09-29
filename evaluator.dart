@@ -5,6 +5,8 @@ final TRUE = Boolean(true);
 final FALSE = Boolean(false);
 final NULL = Null();
 
+String _NOT_A_FUNCTION = 'No es una función';
+
 Object _evaluateBangOperatorExpression(Object right) {
   if (right == TRUE) {
     return FALSE;
@@ -94,6 +96,11 @@ Object? evaluate(ast.ASTNode node, [Enviroment? env]) {
     if (node.expression != null) {
       return evaluate(node.expression!, env);
     }
+  } else if (node is ast.Call) {
+    final function = evaluate(node.function, env);
+    final args =
+        _evaluate_expression(node.arguments ?? [], env); // Ensure it's not null
+    return _apply_function(function!, args as List<Object>);
   } else if (node is ast.Integer) {
     return Integer(node.value as int);
   } else if (node is ast.Boolean) {
@@ -122,12 +129,17 @@ Object? evaluate(ast.ASTNode node, [Enviroment? env]) {
     }
   } else if (node is ast.LetStatement) {
     final value = evaluate(node.value!, env);
-    final real = value;
     if (value != null) {
       env!.set(node.name!.value, value);
     }
   } else if (node is ast.Identifier) {
     return _evaluate_identifier(node, env);
+  } else if (node is ast.Funcion) {
+    final parameters = node.parameters;
+    final body = node.body;
+    return Functions(parameters.cast<String>(), body!, env!);
+  } else if (node is ast.StringLiteral) {
+    return StringObject(node.value as String);
   }
 
   return NULL;
@@ -186,4 +198,46 @@ Object? _evaluate_block_statement(ast.Block block, [Enviroment? env]) {
     }
   }
   return result;
+}
+
+Object _unwrap_Return_Value(Object obj) {
+  if (obj is Return) {
+    return (obj as Return).value;
+  }
+  return obj;
+}
+
+List _evaluate_expression(List expression, [Enviroment? env]) {
+  List resultados = [];
+  for (final exp in expression) {
+    final evaluated = evaluate(exp, env);
+    if (evaluated != null) {
+      resultados.add(evaluated);
+    }
+  }
+  return resultados;
+}
+
+Enviroment _extend_function_env(
+  Functions fn,
+  List<Object> args,
+) {
+  final env = Enviroment();
+  for (var i = 0; i < fn.parameters.length; i++) {
+    env.set(fn.parameters[i], args[i]);
+  }
+  return env;
+}
+
+Object _apply_function(Object fn, List<Object> args) {
+  if (fn is Functions) {
+    final extendedEnv = _extend_function_env(fn, args);
+    final evaluated = evaluate(fn.body, extendedEnv);
+    return _unwrap_Return_Value(evaluated!);
+  }
+  return _new_error(_NOT_A_FUNCTION, [fn.type().toString()]);
+}
+
+Object _new_error(String not_a_function, List<String> list) {
+  throw Exception('Error: $not_a_function, $list');
 }

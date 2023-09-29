@@ -196,3 +196,12 @@ class Call extends Expression {
     return '${function.toString()}($argList)';
   }
 }
+
+class StringLiteral extends Expression {
+  String? value;
+
+  StringLiteral(Token token, {this.value}) : super(token);
+
+  @override
+  String toString() => value.toString();
+}

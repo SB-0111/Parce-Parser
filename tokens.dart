@@ -31,6 +31,7 @@ enum TokenType {
   NOT_EQ,
   EQEQ,
   NEQ,
+  STRING,
 }
 
 class Token {
