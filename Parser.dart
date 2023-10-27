@@ -222,8 +222,8 @@ class Parser {
     return expression;
   }
 
-  Funcion? _parseFunction() {
-    late final Funcion function = Funcion(_currentToken!);
+  Functions? _parseFunction() {
+    late final Functions function = Functions(_currentToken!);
 
     if (!_expectedToken(TokenType.LPAREN)) {
       return null;

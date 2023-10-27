@@ -13,7 +13,7 @@ void startRepl() {
     // var source = '1 + 2';
     // var source = '6>=6';
     // var source = 'variable x=10';
-
+    // var source = 'variable z=funcion(w){w*w}';
     if (source == 'salir()') {
       print("Nos Fuimos");
       break;
@@ -22,7 +22,7 @@ void startRepl() {
     final parser = Parser(lexer);
     final program = parser.parseProgram();
     final evaluated = evaluate(program, env);
-    // print(env.store);
+    print(env.store);
     if (evaluated.runtimeType.toString() != "Null") {
       print(evaluated!.inspect());
     }
