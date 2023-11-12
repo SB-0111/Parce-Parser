@@ -14,6 +14,7 @@ void startRepl() {
     // var source = '6>=6';
     // var source = 'variable x=10';
     // var source = 'variable z=funcion(w){w*w}';
+    // var source = 'si{10>2}{1}si_no{2}';
     if (source == 'salir()') {
       print("Nos Fuimos");
       break;

@@ -400,9 +400,9 @@ class Parser {
       TokenType.DIF: (left) => _parseInfixExpression(left),
       TokenType.LT: (left) => _parseInfixExpression(left),
       TokenType.GT: (left) => _parseInfixExpression(left),
-      TokenType.LPAREN: (left) => _parseCall(left),
       TokenType.LTE: (left) => _parseInfixExpression(left),
       TokenType.GTE: (left) => _parseInfixExpression(left),
+      TokenType.LPAREN: (left) => _parseCall(left),
     };
   }
 
@@ -417,7 +417,40 @@ class Parser {
       TokenType.NEGATION: () => _parsePrefixExpression(),
       TokenType.TRUE: () => _parseBoolean(),
       TokenType.STRING: () => _parseString(),
+      TokenType.IF: () => _parseIfExpression(),
     };
+  }
+
+  If _parseIfExpression() {
+    final ifToken = _currentToken!;
+    if (!_expectedToken(TokenType.LPAREN)) {
+      return If(ifToken); // or handle the error as needed
+    }
+
+    _advanceTokens();
+    final condition = _parseExpression(Precedence.LOWEST);
+
+    if (!_expectedToken(TokenType.RPAREN) ||
+        !_expectedToken(TokenType.LBRACE)) {
+      return If(ifToken); // or handle the error as needed
+    }
+
+    final consequence = _parseBlock();
+
+    // Check for an else statement
+    Block? alternative;
+    if (_peekToken!.token_type == TokenType.ELSE) {
+      _advanceTokens(); // Consume the else token
+      if (!_expectedToken(TokenType.LBRACE)) {
+        return If(ifToken); // or handle the error as needed
+      }
+      alternative = _parseBlock();
+    }
+
+    return If(ifToken,
+        condition: condition,
+        consequence: consequence,
+        alternative: alternative);
   }
 
   Expression _parseString() {
